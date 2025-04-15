@@ -1,0 +1,132 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Red Hub (Die of death)",
+    Icon = 0,
+    LoadingTitle = "Red Hub",
+    LoadingSubtitle = "by DexScripts",
+    Theme = "Default",
+ 
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
+ 
+    ConfigurationSaving = {
+       Enabled = true,
+       FolderName = nil,
+       FileName = "Big Hub"
+    },
+ 
+    Discord = {
+       Enabled = false,
+       Invite = "noinvitelink",
+       RememberJoins = true
+    },
+ 
+    KeySystem = true,
+    KeySettings = {
+       Title = "Verification needed",
+       Subtitle = "Key System",
+       Note = "KEY IS death",
+       FileName = "Key",
+       SaveKey = true,
+       GrabKeyFromSite = false,
+       Key = {"death"}
+    }
+ })
+
+ local Tab = Window:CreateTab("Player", 4483362458) 
+ 
+ local Button = Tab:CreateButton({
+    Name = "Inf Stamina (supports all exec)",
+    Callback = function()
+        local player = game:GetService("Players").LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        
+        if character:GetAttribute("MaxStamina") ~= nil then
+            character:SetAttribute("MaxStamina", math.huge)
+        elseif player:GetAttribute("MaxStamina") ~= nil then
+            player:SetAttribute("MaxStamina", math.huge)
+        else
+            for _, obj in pairs({character, player, character:FindFirstChildOfClass("Humanoid")}) do
+                if obj and obj:GetAttributes() then
+                    for name, _ in pairs(obj:GetAttributes()) do
+                        if name:lower():find("stamina") then
+                            obj:SetAttribute(name, math.huge)
+                        end
+                    end
+                end
+            end
+        end
+        
+        Rayfield:Notify({
+            Title = "Infinite Stamina",
+            Content = "MaxStamina has been set to infinite",
+            Duration = 3
+        })
+    end
+ })
+
+ local Section = Tab:CreateSection("Speed and Power")
+ 
+ local WalkspeedEnabled = false
+ local DefaultWalkSpeed = 16
+ 
+ local WalkspeedSlider = Tab:CreateSlider({
+    Name = "Walkspeed",
+    Range = {7, 250},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = DefaultWalkSpeed,
+    Flag = "WalkspeedSlider",
+    Callback = function(Value)
+        local player = game:GetService("Players").LocalPlayer
+        
+        if player then
+            player:SetAttribute("WalkSpeed", Value)
+            WalkspeedEnabled = true
+        end
+    end,
+ })
+ 
+ local JumpPowerEnabled = false
+ local DefaultJumpPower = 50
+ 
+ local JumpPowerToggle = Tab:CreateToggle({
+    Name = "Enable Jump Power",
+    CurrentValue = false,
+    Flag = "JumpPowerToggle",
+    Callback = function(Value)
+        JumpPowerEnabled = Value
+        local player = game:GetService("Players").LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        
+        if humanoid then
+            if Value then
+                humanoid.JumpPower = JumpPowerSlider.CurrentValue
+            else
+                humanoid.JumpPower = DefaultJumpPower
+            end
+        end
+    end,
+ })
+ 
+ local JumpPowerSlider = Tab:CreateSlider({
+    Name = "Jump Power",
+    Range = {50, 300},
+    Increment = 5,
+    Suffix = "Power",
+    CurrentValue = DefaultJumpPower,
+    Flag = "JumpPowerSlider",
+    Callback = function(Value)
+        if JumpPowerEnabled then
+            local player = game:GetService("Players").LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            
+            if humanoid then
+                humanoid.JumpPower = Value
+            end
+        end
+    end,
+ })
