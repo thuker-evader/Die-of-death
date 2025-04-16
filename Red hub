@@ -22,7 +22,7 @@ local Window = Rayfield:CreateWindow({
        RememberJoins = true
     },
  
-    KeySystem = true,
+    KeySystem = false,
     KeySettings = {
        Title = "Verification needed",
        Subtitle = "Key System",
@@ -36,6 +36,8 @@ local Window = Rayfield:CreateWindow({
 
  local Tab = Window:CreateTab("Player", 4483362458) 
  
+ local PlayerSection = Tab:CreateSection("Stamina")
+
  local Button = Tab:CreateButton({
     Name = "Inf Stamina (supports all exec)",
     Callback = function()
@@ -80,9 +82,10 @@ local Window = Rayfield:CreateWindow({
     Flag = "WalkspeedSlider",
     Callback = function(Value)
         local player = game:GetService("Players").LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
         
-        if player then
-            player:SetAttribute("WalkSpeed", Value)
+        if character then
+            character:SetAttribute("WalkSpeed", Value)
             WalkspeedEnabled = true
         end
     end,
@@ -90,6 +93,8 @@ local Window = Rayfield:CreateWindow({
  
  local JumpPowerEnabled = false
  local DefaultJumpPower = 50
+ 
+ local JumpPowerSection = Tab:CreateSection("Jump Power")
  
  local JumpPowerToggle = Tab:CreateToggle({
     Name = "Enable Jump Power",
@@ -130,3 +135,147 @@ local Window = Rayfield:CreateWindow({
         end
     end,
  })
+
+ local ESPTab = Window:CreateTab("ESP", 4483362458)
+ 
+ local ESPSection = ESPTab:CreateSection("ESP")
+
+ local ESPEnabled = false
+ local ESPFolder = Instance.new("Folder")
+ ESPFolder.Name = "ESP"
+ ESPFolder.Parent = game.CoreGui
+ 
+ local function CreateESP(player)
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = player.Name
+        billboard.AlwaysOnTop = true
+        billboard.Size = UDim2.new(0, 200, 0, 50)
+        billboard.StudsOffset = Vector3.new(0, 3, 0)
+        billboard.Adornee = player.Character.HumanoidRootPart
+        billboard.Parent = ESPFolder
+        
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Name = "NameLabel"
+        nameLabel.Size = UDim2.new(1, 0, 1, 0)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = player.Name
+        nameLabel.TextSize = 18
+        nameLabel.Font = Enum.Font.SourceSansBold
+        nameLabel.TextStrokeTransparency = 0
+        nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+        nameLabel.Parent = billboard
+        
+        local playerRole = "Unknown"
+        for _, folder in pairs(game:GetService("Workspace"):GetChildren()) do
+            if folder:IsA("Folder") then
+                if (folder.Name == "Killer" or folder.Name == "Survivor" or folder.Name == "Ghost") then
+                    for _, char in pairs(folder:GetChildren()) do
+                        if char.Name == player.Name then
+                            playerRole = folder.Name
+                            break
+                        end
+                    end
+                end
+            end
+        end
+        
+        if playerRole == "Killer" then
+            nameLabel.TextColor3 = Color3.new(1, 0, 0)
+        elseif playerRole == "Survivor" then
+            nameLabel.TextColor3 = Color3.new(0, 1, 0)
+        elseif playerRole == "Ghost" then
+            nameLabel.TextColor3 = Color3.new(0, 0, 1)
+        else
+            nameLabel.TextColor3 = Color3.new(1, 1, 1)
+        end
+    end
+ end
+ 
+ local function RemoveESP(player)
+    if ESPFolder:FindFirstChild(player.Name) then
+        ESPFolder[player.Name]:Destroy()
+    end
+ end
+ 
+ local function UpdateESP()
+    if ESPEnabled then
+        for _, player in pairs(game:GetService("Players"):GetPlayers()) do
+            if player ~= game:GetService("Players").LocalPlayer then
+                if not ESPFolder:FindFirstChild(player.Name) then
+                    CreateESP(player)
+                end
+            end
+        end
+    else
+        ESPFolder:ClearAllChildren()
+    end
+ end
+ 
+ ESPTab:CreateToggle({
+    Name = "Chams Toggle",
+    CurrentValue = false,
+    Flag = "ESPToggle",
+    Callback = function(Value)
+        ESPEnabled = Value
+        UpdateESP()
+        
+        if Value then
+            game:GetService("Players").PlayerAdded:Connect(function(player)
+                if ESPEnabled then
+                    CreateESP(player)
+                end
+            end)
+            
+            game:GetService("Players").PlayerRemoving:Connect(function(player)
+                RemoveESP(player)
+            end)
+        end
+    end,
+ })
+
+local OtherTab = Window:CreateTab("Other", 4483362458)
+
+local OtherSection = OtherTab:CreateSection("other stuff")
+
+local Button = OtherTab:CreateButton({
+    Name = "Load Infinite Yield",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+    end,
+})
+
+local Button = OtherTab:CreateButton({
+    Name = "Load Nameless Admin",
+    Callback = function()
+        loadstring(game:HttpGet("https://rawscripts.net/raw/Universal-Script-Nameless-Admin-35212"))()
+    end,
+})
+
+local Button = OtherTab:CreateButton({
+    Name = "Load Octo Spy",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/InfernusScripts/Octo-Spy/refs/heads/main/Main.lua"))()
+    end,
+})
+
+local Button = OtherTab:CreateButton({
+    Name = "Unload Rayfield",
+    Callback = function()
+        Rayfield:Destroy()
+    end,
+})
+
+
+
+ local OtherSection = OtherTab:CreateSection("cool stuff")
+
+local Button = OtherTab:CreateButton({
+    Name = "Suicide",
+    Callback = function()
+        local player = game:GetService("Players").LocalPlayer
+        if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.Health = 0
+        end
+    end,
+})
